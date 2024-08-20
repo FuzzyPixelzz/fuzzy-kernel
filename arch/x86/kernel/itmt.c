@@ -54,10 +54,8 @@ static int sched_itmt_update_handler(struct ctl_table *table, int write,
 	old_sysctl = sysctl_sched_itmt_enabled;
 	ret = proc_dointvec_minmax(table, write, buffer, lenp, ppos);
 
-	if (!ret && write && old_sysctl != sysctl_sched_itmt_enabled) {
-		x86_topology_update = true;
-		rebuild_sched_domains();
-	}
+	if (!ret && write && old_sysctl != sysctl_sched_itmt_enabled)
+		arch_rebuild_sched_domains();
 
 	mutex_unlock(&itmt_update_mutex);
 
@@ -114,8 +112,7 @@ int sched_set_itmt_support(void)
 
 	sysctl_sched_itmt_enabled = 1;
 
-	x86_topology_update = true;
-	rebuild_sched_domains();
+	arch_rebuild_sched_domains();
 
 	mutex_unlock(&itmt_update_mutex);
 
@@ -150,8 +147,7 @@ void sched_clear_itmt_support(void)
 	if (sysctl_sched_itmt_enabled) {
 		/* disable sched_itmt if we are no longer ITMT capable */
 		sysctl_sched_itmt_enabled = 0;
-		x86_topology_update = true;
-		rebuild_sched_domains();
+		arch_rebuild_sched_domains();
 	}
 
 	mutex_unlock(&itmt_update_mutex);
