@@ -88,11 +88,20 @@ unsigned int sysctl_sched_base_slice		= 1000000000ULL / HZ;
 static unsigned int configured_sched_base_slice = 1000000000ULL / HZ;
 unsigned int sysctl_sched_min_base_slice	= CONFIG_MIN_BASE_SLICE_NS;
 #else // !CONFIG_SCHED_BORE
+#ifdef CONFIG_ZEN_INTERACTIVE
+unsigned int sysctl_sched_base_slice			= 400000ULL;
+static unsigned int normalized_sysctl_sched_base_slice	= 400000ULL;
+#else
 unsigned int sysctl_sched_base_slice			= 750000ULL;
 static unsigned int normalized_sysctl_sched_base_slice	= 750000ULL;
+#endif
 #endif // CONFIG_SCHED_BORE
 
+#ifdef CONFIG_ZEN_INTERACTIVE
+const_debug unsigned int sysctl_sched_migration_cost	= 250000UL;
+#else
 const_debug unsigned int sysctl_sched_migration_cost	= 500000UL;
+#endif
 
 #ifdef CONFIG_SCHED_BORE
 u8   __read_mostly sched_bore                   = 1;
@@ -288,7 +297,11 @@ int __weak arch_asym_cpu_priority(int cpu)
  *
  * (default: 5 msec, units: microseconds)
  */
+#ifdef CONFIG_ZEN_INTERACTIVE
+static unsigned int sysctl_sched_cfs_bandwidth_slice		= 3000UL;
+#else
 static unsigned int sysctl_sched_cfs_bandwidth_slice		= 5000UL;
+#endif
 #endif
 
 #ifdef CONFIG_NUMA_BALANCING
