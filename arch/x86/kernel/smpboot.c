@@ -39,6 +39,7 @@
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
+#include <linux/cpuset.h>
 #include <linux/init.h>
 #include <linux/smp.h>
 #include <linux/export.h>
@@ -125,7 +126,7 @@ static DEFINE_PER_CPU_ALIGNED(struct mwait_cpu_dead, mwait_cpu_dead);
 int __read_mostly __max_smt_threads = 1;
 
 /* Flag to indicate if a complete sched domain rebuild is required */
-bool x86_topology_update;
+static bool x86_topology_update;
 
 int arch_update_cpu_topology(void)
 {
@@ -134,6 +135,13 @@ int arch_update_cpu_topology(void)
 	x86_topology_update = false;
 	return retval;
 }
+
+#ifdef CONFIG_X86_64
+void arch_rebuild_sched_domains(void) {
+	x86_topology_update = true;
+	rebuild_sched_domains();
+}
+#endif
 
 static unsigned int smpboot_warm_reset_vector_count;
 
